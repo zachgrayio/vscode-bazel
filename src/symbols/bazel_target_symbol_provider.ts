@@ -17,7 +17,7 @@ import { DocumentSymbolProvider } from "vscode";
 
 import { BazelWorkspaceInfo, QueryLocation } from "../bazel";
 import { getTargetsForBuildFile } from "../bazel";
-import { getDefaultBazelExecutablePath } from "../extension/configuration";
+import { getDefaultBazelExecutablePath, areBazelQueriesEnabled } from "../extension/configuration";
 import { blaze_query } from "../protos";
 
 /** Provids Symbols for targets in Bazel BUILD files. */
@@ -25,6 +25,10 @@ export class BazelTargetSymbolProvider implements DocumentSymbolProvider {
   public async provideDocumentSymbols(
     document: vscode.TextDocument,
   ): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+    if (!areBazelQueriesEnabled()) {
+      return [];
+    }
+
     const workspaceInfo = BazelWorkspaceInfo.fromDocument(document);
     if (workspaceInfo === undefined) {
       // Not in a Bazel Workspace.
